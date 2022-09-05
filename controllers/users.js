@@ -70,26 +70,78 @@ const createUser = (req, res, next) => {
   } = req.body;
 
   bcrypt
-  .hash(password, 10)
-  .then((hash) => {
-    return User.create({
-      email,
-      password: hash,
-      username,
+    .hash(password, 10)
+    .then((hash) => {
+      return User.create({
+        email,
+        password: hash,
+        username,
+      });
+    })
+    .then((user) => {
+      res
+        .status(201)
+        .send({
+          email: user.email,
+          username: user.username,
+        });
+    })
+    .catch((err) => {
+      if (err.name === 'MongoServerError' || err.code === 11000) {
+        throw new AppError(409, 'Email already exist');
+      }
+      next(err);
     });
-  })
-  .then((user) => {
-    res
-    .status(201)
-    .send({
-      email: user.email,
-      username: user.username,
-    });
-  })
-  .catch((err) => {
-    if (err.name === 'MongoServerError' || err.code === 11000) {
-      throw new AppError(409, 'Email already exist');
+};
+
+const updateProfile = async (req, res, next) => {
+  const { name } = req.body;
+
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: req.user._id },
+      { name },
+      { new: true, runValidators: true },
+    );
+
+    if (!user) {
+      throw new AppError(404, 'User ID not found');
+    } else {
+      res.status(200).send(user);
     }
-    next(err);
-  });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const login = (req, res, next) => {
+  const { email, password } = req.body;
+
+  User.findUserByCredentials(email, password)
+    .then((user) => {
+      const token = jwt.sign(
+        { _id: user._id },
+        NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret-string',
+        { expiresIn: '7d' },
+      );
+
+      if (!user) {
+        throw new AppError(401, 'Wrong email / password');
+      }
+
+      res.status(200).send({ user, token, message: 'successful' }); // need to edit the message
+    })
+    .catch((err) => {
+      console.log('login error: ', err);
+      next(err);
+    });
+};
+
+module.exports = {
+  getUsers,
+  getCurrentUser,
+  getUserById,
+  createUser,
+  updateProfile,
+  login,
 };
