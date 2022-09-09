@@ -9,7 +9,7 @@ const createUser = (req, res, next) => {
   const {
     email,
     password,
-    username,
+    name,
   } = req.body;
 
   bcrypt
@@ -18,7 +18,7 @@ const createUser = (req, res, next) => {
       return User.create({
         email,
         password: hash,
-        username,
+        name,
       });
     })
     .then((user) => {
@@ -26,13 +26,14 @@ const createUser = (req, res, next) => {
         .status(201)
         .send({
           email: user.email,
-          username: user.username,
+          name: user.name,
         });
     })
     .catch((err) => {
       if (err.name === 'MongoServerError' || err.code === 11000) {
         throw new AppError(409, 'Email already exist');
       }
+      console.log('error in register', err);
       next(err);
     });
 };
