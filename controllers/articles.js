@@ -2,17 +2,15 @@ const Article = require('../models/article');
 const { AppError } = require('../errors/AppError');
 
 const getArticles = (req, res, next) => {
-  const owner = req.user._id;
-
-  Article.find({ owner })
+  Article.find({})
+    .select('+owner')
     .then((articles) => {
-      res.status(200).send(articles);
-      return articles;
+      const ownedArticles = articles.filter((item) => item.owner === req.user._id);
+      res.status(200).send(ownedArticles);
     })
     .catch((err) => {
-      console.log('error in get articles function: ', err);
       next(err);
-    });
+    })
 };
 
 const createArticle = (req, res, next) => {
@@ -25,6 +23,7 @@ const createArticle = (req, res, next) => {
     link,
     image,
   } = req.body;
+
   const owner = req.user._id;
 
   Article.create({
