@@ -18,11 +18,12 @@ const app = express();
 // define users and articles routes
 // const usersRouter = require('./routes/users');
 // const articlesRouter = require('./routes/articles');
-// const authRouter = require('./routes/auth');
+const authRouter = require('./routes/auth');
 const appRouter = require('./routes/index');
 
 // connect mongodb
 mongoose.connect('mongodb://localhost:27017/news-api');
+// mongoose.connect('mongodb://35.199.171.220:27017/news-api');
 
 // use cors and options cors
 app.use(cors());
@@ -37,8 +38,8 @@ app.use(requestLogger);
 // use routes for users and articles
 // app.use('/users', usersRouter);
 // app.use('/articles', articlesRouter);
-// app.use('/', authRouter);
-// app.use('/', authRouter);
+app.use('/', authRouter);
+app.use('/', authRouter);
 app.use(auth);
 
 app.use(appRouter);
