@@ -12,6 +12,7 @@ const limiter = require('./middlewares/limiter');
 require('dotenv').config();
 
 const { PORT = 3000 } = process.env;
+const { NODE_ENV, DB_ADDRESS } = process.env;
 
 const app = express();
 
@@ -22,7 +23,11 @@ const authRouter = require('./routes/auth');
 const appRouter = require('./routes/index');
 
 // connect mongodb
-mongoose.connect('mongodb://localhost:27017/news-api');
+mongoose.connect(
+  NODE_ENV === 'production'
+    ? DB_ADDRESS
+    : 'mongodb://localhost:27017/news-api'
+);
 // mongoose.connect('mongodb://35.199.171.220:27017/news-api');
 
 // use cors and options cors
