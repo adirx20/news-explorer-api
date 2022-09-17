@@ -14,13 +14,11 @@ const createUser = (req, res, next) => {
 
   bcrypt
     .hash(password, 10)
-    .then((hash) => {
-      return User.create({
-        email,
-        password: hash,
-        name,
-      });
-    })
+    .then((hash) => User.create({
+      email,
+      password: hash,
+      name,
+    }))
     .then((user) => {
       res
         .status(201)
@@ -31,9 +29,9 @@ const createUser = (req, res, next) => {
     })
     .catch((err) => {
       if (err.name === 'MongoServerError' || err.code === 11000) {
+        res.status(409).send({ message: 'Email already exist' });
         throw new AppError(409, 'Email already exist');
       }
-      console.log('error in register', err);
       next(err);
     });
 };
@@ -53,7 +51,7 @@ const login = (req, res, next) => {
         throw new AppError(401, 'Wrong email / password');
       }
 
-      res.status(200).send({ user, token, message: 'successful' }); // need to edit the message
+      res.status(200).send({ token, message: 'Logged in successfully' }); // need to edit the message
     })
     .catch((err) => {
       console.log('login error: ', err);

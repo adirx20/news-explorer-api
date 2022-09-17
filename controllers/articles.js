@@ -2,15 +2,13 @@ const Article = require('../models/article');
 const { AppError } = require('../errors/AppError');
 
 const getArticles = (req, res, next) => {
-  const owner = req.user._id;
-
-  Article.find({ owner })
+  Article.find({})
+    .select('+owner')
     .then((articles) => {
-      res.status(200).send(articles);
-      return articles;
+      const ownedArticles = articles.filter((item) => item.owner === req.user._id);
+      res.status(200).send(ownedArticles);
     })
     .catch((err) => {
-      console.log('error in get articles function: ', err);
       next(err);
     });
 };
@@ -25,6 +23,7 @@ const createArticle = (req, res, next) => {
     link,
     image,
   } = req.body;
+
   const owner = req.user._id;
 
   Article.create({
@@ -38,7 +37,7 @@ const createArticle = (req, res, next) => {
     owner,
   })
     .then((article) => {
-      res.status(201).send(article)
+      res.status(201).send(article);
     })
     .catch((err) => {
       next(err);
@@ -46,7 +45,7 @@ const createArticle = (req, res, next) => {
 };
 
 const deleteArticle = (req, res, next) => {
-  const articleId = req.params.articleId;
+  const { articleId } = req.params.articleId;
 
   Article.findOne({ _id: articleId })
     .select('+owner')
@@ -55,7 +54,7 @@ const deleteArticle = (req, res, next) => {
         throw new AppError(404, 'Article ID not found');
       }
       if (article.owner.toString() !== req.user._id) {
-        throw new AppError(403, `You don't have permission to delete this article`);
+        throw new AppError(403, 'You dont have permission to delete this article');
       }
       return Article.findOneAndDelete(articleId)
         .then((deletedArticle) => {
