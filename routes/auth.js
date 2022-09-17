@@ -11,15 +11,15 @@ const router = express.Router();
 router.post('/signup', celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    email: Joi.string().required(),
-    password: Joi.string().required(),
+    email: Joi.string().required().custom(validateURL),
+    password: Joi.string().required().custom(validateURL),
   }),
 }), createUser);
 
 router.post('/signin', celebrate({
   body: Joi.object().keys({
-    email: Joi.string().required(),
-    password: Joi.string().required(),
+    email: Joi.string().required().custom(validateURL),
+    password: Joi.string().required().custom(validateURL),
   }),
 }), login);
 

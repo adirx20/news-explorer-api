@@ -26,7 +26,7 @@ const appRouter = require('./routes/index');
 mongoose.connect(
   NODE_ENV === 'production'
     ? DB_ADDRESS
-    : 'mongodb://localhost:27017/news-api'
+    : 'mongodb://localhost:27017/news-api',
 );
 // mongoose.connect('mongodb://35.199.171.220:27017/news-api');
 
@@ -49,7 +49,7 @@ app.use(auth);
 
 app.use(appRouter);
 
-app.use('/', (req, res) => {
+app.use('/', () => {
   throw new AppError(404, 'Requested resource was not found');
 });
 

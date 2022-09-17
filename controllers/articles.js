@@ -10,7 +10,7 @@ const getArticles = (req, res, next) => {
     })
     .catch((err) => {
       next(err);
-    })
+    });
 };
 
 const createArticle = (req, res, next) => {
@@ -37,7 +37,7 @@ const createArticle = (req, res, next) => {
     owner,
   })
     .then((article) => {
-      res.status(201).send(article)
+      res.status(201).send(article);
     })
     .catch((err) => {
       next(err);
@@ -45,7 +45,7 @@ const createArticle = (req, res, next) => {
 };
 
 const deleteArticle = (req, res, next) => {
-  const articleId = req.params.articleId;
+  const { articleId } = req.params.articleId;
 
   Article.findOne({ _id: articleId })
     .select('+owner')
@@ -54,7 +54,7 @@ const deleteArticle = (req, res, next) => {
         throw new AppError(404, 'Article ID not found');
       }
       if (article.owner.toString() !== req.user._id) {
-        throw new AppError(403, `You don't have permission to delete this article`);
+        throw new AppError(403, 'You dont have permission to delete this article');
       }
       return Article.findOneAndDelete(articleId)
         .then((deletedArticle) => {
